@@ -1,7 +1,7 @@
-# Debt Quest v0.4 — Budgetopolis
+# Debt Quest v0.5 — Animated Battle Prototype
 
-Experimental GitHub Pages build. Upload the contents of this folder to a NEW public repository (or a separate branch configured for Pages); do not overwrite the existing v0.1 site.
+Upload all seven files to the root of the **debt-quest-v04-test** GitHub repository, replacing matching existing files. The new `battle.js` is required. GitHub Pages should remain set to main / (root).
 
-Features: title screen, first-time avatar creation, pixel preview, 5 AM local daily reset, rotating quests, guided debt/savings/bill commissions, encounter trivia, lorebook, local-only saves.
+Navigate to **Adventure → Enter Animated Battle (NEW)**. This is a first-pass procedural pixel-art battle, not a licensed sprite asset or complete Octopath-style game. Includes animated fighters, Attack, Twin-Blade Art, Defend, Insight, victory rewards, and safe defeat. All battle rewards are fictional and real balances are untouched.
 
-This build does not sync devices or connect to banks. Export existing saves before testing. Financial entries should use actual balances, not example amounts.
+For best testing, export your financial ledger before upgrading. Mobile Safari may cache an older PWA: reload or reopen the site after publishing. No bank connections or cloud sync.
