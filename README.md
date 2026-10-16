@@ -1,14 +1,7 @@
-# Debt Quest v0.7 — Sprite-sheet Combat Revamp
+# Debt Quest v0.8 — Night Hunter art integration (experimental)
 
-Deploy all **nine** files to the root of your existing GitHub Pages test repository. Do not upload only the ZIP. `hero-sprites.png` and `skeleton-sprites.png` are mandatory new files. The updated `battle.js` loads these actual six-frame PNG sheets and falls back to older procedural drawing if images fail to load.
+Uses cropped character poses from the approved Night Hunter / Coin Wraith concept artwork, with edge-based background removal. These are **real artwork-derived frames**, not the previous procedural block sprites. This is an intermediate asset pipeline: frames require artist cleanup, better registration and fully authored animation cycles.
 
-## Changes
-- Two original transparent 6-frame sprite sheets (idle, lunge, strike, hit, victory) with swords drawn in the hands.
-- Cache version changed to `debt-quest-v07-assets` and battle script versioned with `?v=07`.
-- Cancel delayed battle actions when leaving/restarting an encounter.
-- Correct enemy damage-number bookkeeping.
+Upload **the extracted files**, not the ZIP, to the GitHub Pages repository root. Back up local finance records before replacing the app. `hero-sprites.png` and `skeleton-sprites.png` are required.
 
-## Limits
-- This is a first original pixel-art asset pass, not studio-quality frame-by-frame animation or an Octopath asset reproduction.
-- The selected character creator cosmetics do not yet affect the sprites.
-- Financial information is saved locally; back up saves before deployment.
+Checks: JavaScript syntax, asset dimensions, and ZIP contents. Browser/iPhone animation has not been verified.

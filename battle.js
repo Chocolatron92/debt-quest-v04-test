@@ -4,7 +4,7 @@ const CSS=`#dqBattle{position:fixed;inset:0;z-index:120;background:#080b17;color
 const style=document.createElement('style');style.textContent=CSS;document.head.append(style);
 let scene=null,raf=0, battleGeneration=0, pending=[];
 const spriteImages={};
-for(const key of ['hero','skeleton']){const img=new Image();img.src='./'+key+'-sprites.png?v=07';spriteImages[key]=img;}
+for(const key of ['hero','skeleton']){const img=new Image();img.src='./'+key+'-sprites.png?v=08';spriteImages[key]=img;img.onerror=()=>{console.error('Debt Quest sprite asset missing:',img.src);const l=document.getElementById('bLog');if(l)l.textContent='Sprite asset failed to load. Check hero-sprites.png and skeleton-sprites.png in GitHub.';};}
 function delay(fn,ms){const token=battleGeneration;const id=setTimeout(()=>{pending=pending.filter(v=>v!==id);if(scene&&token===battleGeneration)fn();},ms);pending.push(id);}
 function clearBattleTimers(){battleGeneration++;pending.forEach(clearTimeout);pending=[];}
 
@@ -16,7 +16,7 @@ function hit(amount,kind){const s=scene;if(!s)return;s.damage=amount;s.kind=kind
 function enemyTurn(){const s=scene;if(!s)return;const n=s.guard?3:7+Math.floor(Math.random()*5);s.hp=Math.max(0,s.hp-n);s.anim=performance.now();s.kind='enemy';s.damage=n;s.message=`${s.enemyName} attacks! ${n} damage${s.guard?' (guarded)':''}.`;s.guard=false;s.phase='anim';paint();delay(()=>{if(s.hp===0){s.phase='lost';s.message='You fall in battle. Guild scouts bring you home safely. No real-world penalty.';dq3.hp=3;dq3.encounter=null;dqSave();}else{s.phase='ready';}paint();if(s.phase==='lost')finishButtons();},800)}
 function win(){const s=scene;if(!s||s.phase==='won')return;s.phase='won';const reward=12+Math.min(10,s.turn)*2;state.xp+=reward;dq3.gold+=8;dq3.depth++;dq3.encounter=null;dqSave();save();s.message=`VICTORY! +${reward} XP · +8 guild gold · Depth ${dq3.depth} unlocked!`;paint();finishButtons();}
 function finishButtons(){document.getElementById('bActions').innerHTML='<button data-battle="exit">🏰 Return to Guild</button><button data-battle="again">⚔️ Next Encounter</button>';}
-function handle(e){const b=e.target.closest('[data-battle]');if(!b||!scene)return;const s=scene,a=b.dataset.battle;if(a==='exit'){close();return}if(a==='again'){close();open();return}if(s.phase!=='ready')return;s.turn++;if(a==='attack'){s.focus=clamp(s.focus+1,0,3);hit(8+Math.floor(Math.random()*7),'attack')}if(a==='skill'){if(s.focus<2)return;s.focus-=2;hit(21+Math.floor(Math.random()*10),'skill')}if(a==='guard'){s.guard=true;s.focus=clamp(s.focus+1,0,3);s.message='You brace behind your cloak and gain 1 Focus.';paint();enemyTurn()}if(a==='insight'){const q=dqQuestions[Math.floor(Math.random()*dqQuestions.length)];s.phase='quiz';s.question=q;s.message='Guild Insight: answer to gain Focus and a shield. Incorrect answers only miss the bonus.';document.getElementById('bQuiz').innerHTML=`<div class="battleQuiz"><strong>${esc(q.q)}</strong>${q.a.map((v,i)=>`<button data-battle="answer" data-choice="${i}">${esc(v)}</button>`).join('')}</div>`;paint()}}
+function handle(e){const b=e.target.closest('[data-battle]');if(!b||!scene)return;const s=scene,a=b.dataset.battle;if(a==='exit'){close();return}if(a==='again'){close();open();return}if(s.phase!=='ready')return;s.turn++;if(a==='attack'){s.focus=clamp(s.focus+1,0,3);hit(8+Math.floor(Math.random()*7),'attack')}if(a==='skill'){if(s.focus<2)return;s.focus-=2;hit(21+Math.floor(Math.random()*10),'skill')}if(a==='guard'){s.guard=true;s.focus=clamp(s.focus+1,0,3);s.message='You brace behind your cloak and gain 1 Focus.';s.phase='anim';s.kind='guard';s.anim=performance.now();paint();delay(enemyTurn,420)}if(a==='insight'){const q=dqQuestions[Math.floor(Math.random()*dqQuestions.length)];s.phase='quiz';s.question=q;s.message='Guild Insight: answer to gain Focus and a shield. Incorrect answers only miss the bonus.';document.getElementById('bQuiz').innerHTML=`<div class="battleQuiz"><strong>${esc(q.q)}</strong>${q.a.map((v,i)=>`<button data-battle="answer" data-choice="${i}">${esc(v)}</button>`).join('')}</div>`;paint()}}
 function answer(e){const b=e.target.closest('[data-battle="answer"]');if(!b||!scene||scene.phase!=='quiz')return;const s=scene,q=s.question,correct=Number(b.dataset.choice)===q.correct;document.getElementById('bQuiz').innerHTML='';s.phase='ready';if(correct){s.focus=clamp(s.focus+2,0,3);s.guard=true;s.message=`Insight gained! +2 Focus and Guard. ${q.why}`;}else{s.message=`Not quite. ${q.why} No penalty—try another strategy.`;}paint();enemyTurn();}
 function close(){clearBattleTimers();cancelAnimationFrame(raf);document.getElementById('dqBattle')?.remove();scene=null;render()}
 function loop(){if(!scene)return;const c=document.getElementById('bCanvas'),ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;const s=scene,t=performance.now()/1000;ctx.fillStyle='#141b35';ctx.fillRect(0,0,384,216);
@@ -82,7 +82,7 @@ ctx.restore()}
 rect(heroX-21,185,42,4,'#111723');rect(enemyX-22,185,44,4,'#111723');
 // Frame-based, transparent PNG sprite sheets; each weapon is drawn as part of its pose.
 const frame=active?(attacking?(elapsed<.20?2:elapsed<.44?3:1):countering?(elapsed<.35?2:3):4):(s.phase==='won'?5:Math.floor(t*2.6)%2);
-function actor(name,x,y,f){const img=spriteImages[name];if(img.complete&&img.naturalWidth){ctx.drawImage(img,f*96,0,96,112,Math.round(x-47),Math.round(y-79),94,110);return true;}return false;}
+function actor(name,x,y,f){const img=spriteImages[name];if(img.complete&&img.naturalWidth){ctx.drawImage(img,f*128,0,128,128,Math.round(x-58),Math.round(y-95),116,128);return true;}return false;}
 if(!actor('hero',heroX,151,frame))hero(heroX,151);
 const enemyFrame=active?(countering?(elapsed<.28?2:3):attacking?4:1):Math.floor(t*2)%2;
 if(!actor('skeleton',enemyX,148,enemyFrame))skeleton(enemyX,148);
@@ -91,7 +91,7 @@ if(attacking&&elapsed>.12&&elapsed<.52){const alpha=1-Math.abs(elapsed-.32)/.23;
 if(countering&&elapsed>.16&&elapsed<.46){ctx.strokeStyle='#f59bad';ctx.lineWidth=4;ctx.beginPath();ctx.arc(heroX,137,32,-1.4,1.2);ctx.stroke()}
 // HP bars
 rect(48,18,106,10,'#111827');rect(49,19,Math.round(104*s.hp/s.maxhp),8,'#66d8a2');rect(231,18,106,10,'#111827');rect(232,19,Math.round(104*s.enemyHp/s.enemyMax),8,'#ef7a80');
-if(s.phase==='anim'&&performance.now()-s.anim<410){ctx.globalAlpha=.75;rect(s.kind==='enemy'?heroX-20:enemyX-20,100,42,65,s.kind==='enemy'?'#f46b8b':'#e7e6ad');ctx.globalAlpha=1;ctx.fillStyle='#fff4b2';ctx.font='bold 15px monospace';ctx.fillText('-'+s.damage,enemyX-10,89)}
+if(s.phase==='anim'&&performance.now()-s.anim<410){ctx.globalAlpha=.75;rect(s.kind==='enemy'?heroX-20:enemyX-20,100,42,65,s.kind==='enemy'?'#f46b8b':'#e7e6ad');ctx.globalAlpha=1;ctx.fillStyle='#fff4b2';ctx.font='bold 15px monospace';ctx.fillText('-'+s.damage,(s.kind==='enemy'?heroX:enemyX)-10,89)}
 for(let i=0;i<10;i++){const x=(i*57+t*(i%2?4:-3)+384)%384,y=30+(i*31)%120;rect(x,y,2,2,i%2?'#e4c780':'#8ad1cf')}
 raf=requestAnimationFrame(loop)}
 document.addEventListener('click',answer);
