@@ -19,12 +19,66 @@ function loop(){if(!scene)return;const c=document.getElementById('bCanvas'),ctx=
 for(let i=0;i<3;i++){ctx.fillStyle=['#202c4a','#293853','#33475c'][i];ctx.beginPath();ctx.moveTo(0,140+i*9);for(let x=0;x<=384;x+=24)ctx.lineTo(x,82+i*20+Math.sin(x*.023+i*2+t*.03)*19);ctx.lineTo(384,216);ctx.lineTo(0,216);ctx.fill()}
 ctx.fillStyle='#131a30';ctx.fillRect(264,55,14,55);ctx.fillRect(290,40,22,73);ctx.fillRect(318,60,12,52);ctx.fillStyle='#ffcf7d';ctx.fillRect(298,61,5,9);
 ctx.fillStyle='#263b40';ctx.fillRect(0,157,384,59);for(let i=0;i<38;i++){ctx.fillStyle=i%3?'#3a5551':'#496052';ctx.fillRect((i*47)%384,160+(i*17)%50,9,3)}
-const float=Math.sin(t*3)*2,heroX=94+(s.kind==='attack'||s.kind==='skill'?Math.max(0,1-(performance.now()-s.anim)/500)*105:0),enemyX=284+(s.kind==='enemy'?Math.max(0,1-(performance.now()-s.anim)/500)*-70:0);
-// 16-bit styled pixel character using rectangular clusters
-ctx.fillStyle='#131625';ctx.fillRect(heroX-19,184,38,6);ctx.fillRect(enemyX-19,184,38,6);
+// Animated, articulated pixel actors. All weapons are attached to hand positions.
+const elapsed=(performance.now()-s.anim)/1000;
+const active=s.phase==='anim'&&elapsed<.72;
+const attacking=active&&(s.kind==='attack'||s.kind==='skill');
+const countering=active&&s.kind==='enemy';
+const dash=attacking?Math.sin(Math.min(1,elapsed/.62)*Math.PI)*105:0;
+const lunge=countering?Math.sin(Math.min(1,elapsed/.62)*Math.PI)*-73:0;
+const heroX=94+dash,enemyX=284+lunge;
 function rect(x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
-const hY=135+float;rect(heroX-10,hY+17,8,29,'#121724');rect(heroX+3,hY+17,8,29,'#121724');rect(heroX-16,hY-5,32,30,'#101827');rect(heroX-12,hY-14,24,18,'#334262');rect(heroX-9,hY-31,19,19,'#8a624e');rect(heroX-12,hY-36,24,11,'#151525');rect(heroX+3,hY-24,3,3,'#e8d6aa');rect(heroX-18,hY-7,6,27,'#0a0c16');rect(heroX+15,hY-7,6,27,'#0a0c16');rect(heroX+21,hY-29,4,30,'#dbe9f1');rect(heroX-28,hY-21,4,30,'#dbe9f1');rect(heroX+20,hY-30,6,4,'#8ee7f0');
-const eY=130-Math.sin(t*2)*2;rect(enemyX-11,eY+27,9,27,'#d9d4c1');rect(enemyX+4,eY+27,9,27,'#d9d4c1');rect(enemyX-13,eY-6,27,35,'#d9d4c1');rect(enemyX-8,eY+1,17,20,'#333a48');rect(enemyX-15,eY-33,30,29,'#eee7cf');rect(enemyX-10,eY-21,7,7,'#c44c60');rect(enemyX+4,eY-21,7,7,'#c44c60');rect(enemyX-5,eY-10,11,4,'#2d3340');rect(enemyX-23,eY,7,34,'#e7ddc6');rect(enemyX+17,eY,7,34,'#e7ddc6');rect(enemyX+22,eY-22,3,40,'#9baac0');
+function poly(points,col){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(Math.round(points[0][0]),Math.round(points[0][1]));for(let i=1;i<points.length;i++)ctx.lineTo(Math.round(points[i][0]),Math.round(points[i][1]));ctx.closePath();ctx.fill()}
+function limb(x1,y1,x2,y2,w,col){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='square';ctx.beginPath();ctx.moveTo(Math.round(x1),Math.round(y1));ctx.lineTo(Math.round(x2),Math.round(y2));ctx.stroke()}
+function blade(x,y,angle,reverse=false){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.rotate(angle);rect(-3,-2,6,8,'#6a493a');rect(-7,-7,14,4,'#c7a261');poly([[-3,-7],[3,-7],[3,-38],[0,-46],[-3,-38]],'#a8c6d5');rect(-1,-35,2,26,'#f1f4ec');rect(-3,-38,2,22,'#718da9');ctx.restore()}
+function hero(x,y){ctx.save();ctx.translate(Math.round(x),Math.round(y));const bob=Math.sin(t*3.4)*1.7;ctx.translate(0,bob);const strike=attacking?Math.sin(Math.min(1,elapsed/.65)*Math.PI):0;const cloak=Math.sin(t*4)*3-(attacking?11*strike:0);
+// Cloak silhouette, lined hem, folds and hood
+poly([[-11,-31],[-21,-20],[-24+cloak,12],[-18+cloak,29],[-7,25],[13,27],[24+cloak,23],[20,-18],[10,-31]],'#090c1b');
+poly([[-15,-21],[-19+cloak,11],[-15+cloak,25],[-8,19],[-7,-20]],'#24304c');
+poly([[12,-23],[18+cloak,15],[15+cloak,25],[9,20]],'#354365');
+rect(-13,15,10,21,'#202838');rect(4,15,10,21,'#202838');rect(-14,31,12,8,'#0b0f19');rect(4,31,13,8,'#0b0f19');rect(-13,32,3,5,'#8e7e67');rect(5,32,3,5,'#8e7e67');
+// Tunic, layered armor, straps, belt and silver trim
+poly([[-13,-27],[11,-27],[16,15],[-15,15]],'#35405b');rect(-9,-21,18,30,'#293b53');
+poly([[-12,-23],[1,-15],[-2,-10],[-15,-18]],'#647b91');poly([[9,-23],[-2,-14],[1,-10],[13,-19]],'#71879d');
+limb(-10,-22,8,10,3,'#806548');rect(-13,8,28,5,'#151b2a');rect(-2,8,6,5,'#d4b96f');
+rect(-6,-6,5,5,'#4f6077');rect(5,-6,5,5,'#4f6077');
+// Head, face, textured hair, hood and highlights
+rect(-9,-44,19,21,'#80553e');rect(-7,-43,16,16,'#a77757');rect(3,-36,3,3,'#f4dfb0');rect(6,-31,3,2,'#573a34');
+poly([[-13,-43],[-11,-52],[7,-53],[13,-44],[11,-38],[7,-45],[-8,-45],[-11,-37]],'#111321');
+for(let i=0;i<6;i++)rect(-8+i*3,-49+(i%2),2,4,i%2?'#242031':'#17131d');
+// Two moving forearms, hands, and blades: no floating weapons
+const swing=attacking?Math.sin(Math.min(1,elapsed/.62)*Math.PI*1.55):0;
+const lx=-18-7*swing,ly=-13-12*swing,rx=19+10*swing,ry=-11-17*swing;
+limb(-12,-20,lx,ly,9,'#28344b');limb(12,-20,rx,ry,9,'#35465e');
+rect(lx-4,ly-3,8,7,'#171e2d');rect(rx-4,ry-3,8,7,'#171e2d');
+rect(lx-2,ly-2,4,3,'#a97d5c');rect(rx-2,ry-2,4,3,'#a97d5c');
+blade(lx,ly,attacking?-1.0+1.9*swing:-.56);blade(rx,ry,attacking?.8-2.1*swing:.58);
+ctx.restore()}
+function skeleton(x,y){ctx.save();ctx.translate(Math.round(x),Math.round(y+Math.sin(t*2.6)*1.5));const recoil=active&&s.kind!=='enemy'?Math.sin(Math.min(1,elapsed/.6)*Math.PI)*10:0;ctx.translate(recoil,0);const sway=Math.sin(t*2.3)*2;
+// Tattered mantle, cracked breastplate, ribcage, exposed spine
+poly([[-19,-25],[-29,-8],[-24,20],[-11,12],[16,17],[25,-8],[16,-28]],'#4d3447');
+poly([[-17,-23],[-24,-5],[-20,15],[-10,8]],'#755064');
+limb(-7,7,-8,28,8,'#c6bca4');limb(8,7,10,28,8,'#c6bca4');
+rect(-14,26,12,9,'#bbb29e');rect(4,26,13,9,'#bbb29e');rect(-10,27,3,6,'#efe4c9');
+rect(-4,-22,8,33,'#d8d0b7');for(let j=0;j<4;j++){limb(-4,-20+j*6,-15,-18+j*6,3,'#dcd3b9');limb(4,-20+j*6,15,-18+j*6,3,'#dcd3b9')}
+rect(-12,7,24,9,'#c5bca4');rect(-6,7,12,9,'#54485a');
+// Detailed skull, jaw, glowing eye sockets, crown fracture
+rect(-17,-52,34,29,'#c7bda7');rect(-14,-55,28,29,'#eee2c7');rect(-11,-26,24,11,'#d7c8ab');
+rect(-11,-42,9,8,'#392936');rect(5,-42,9,8,'#392936');rect(-8,-40,4,4,'#f26383');rect(7,-40,4,4,'#f26383');
+poly([[-1,-32],[4,-32],[6,-26],[-4,-26]],'#65545b');for(let i=0;i<5;i++)rect(-8+i*5,-22,2,5,'#6c6260');
+limb(-12,-53,-5,-47,2,'#8e8178');limb(-5,-47,-9,-43,2,'#8e8178');
+// Jointed arms and weapon held in bony right hand
+const arm=countering?Math.sin(Math.min(1,elapsed/.6)*Math.PI):0;
+limb(-16,-17,-24+sway,-1,6,'#ded4b9');limb(-24+sway,-1,-25+sway,12,5,'#ded4b9');
+limb(16,-17,25+arm*5,-3-arm*9,6,'#ded4b9');limb(25+arm*5,-3-arm*9,29+arm*9,11-arm*17,5,'#ded4b9');
+rect(26+arm*9,8-arm*17,6,5,'#e9ddc0');
+ctx.save();ctx.translate(29+arm*9,10-arm*17);ctx.rotate(.18-arm*1.2);rect(-2,-4,5,11,'#64495b');rect(-5,-5,11,4,'#ad9b78');poly([[-3,-5],[3,-5],[3,-43],[0,-51],[-3,-43]],'#91a5ba');rect(-1,-41,2,31,'#d9e7e8');ctx.restore();
+ctx.restore()}
+rect(heroX-21,185,42,4,'#111723');rect(enemyX-22,185,44,4,'#111723');
+hero(heroX,151);skeleton(enemyX,148);
+// Directional slash arcs, sparks and impact flashes
+if(attacking&&elapsed>.12&&elapsed<.52){const alpha=1-Math.abs(elapsed-.32)/.23;ctx.globalAlpha=Math.max(0,alpha);ctx.strokeStyle=s.kind==='skill'?'#8aeaff':'#f5e4b1';ctx.lineWidth=s.kind==='skill'?5:3;for(let i=0;i<(s.kind==='skill'?3:2);i++){ctx.beginPath();ctx.arc(enemyX-7,133,24+i*8,-1.5+i*.42,1.4+i*.32);ctx.stroke()}for(let i=0;i<12;i++){const a=i*2.4+t*3;rect(enemyX+Math.cos(a)*25,128+Math.sin(a)*23,3,3,i%2?'#f9d98d':'#9dd9f4')}ctx.globalAlpha=1}
+if(countering&&elapsed>.16&&elapsed<.46){ctx.strokeStyle='#f59bad';ctx.lineWidth=4;ctx.beginPath();ctx.arc(heroX,137,32,-1.4,1.2);ctx.stroke()}
 // HP bars
 rect(48,18,106,10,'#111827');rect(49,19,Math.round(104*s.hp/s.maxhp),8,'#66d8a2');rect(231,18,106,10,'#111827');rect(232,19,Math.round(104*s.enemyHp/s.enemyMax),8,'#ef7a80');
 if(s.phase==='anim'&&performance.now()-s.anim<410){ctx.globalAlpha=.75;rect(s.kind==='enemy'?heroX-20:enemyX-20,100,42,65,s.kind==='enemy'?'#f46b8b':'#e7e6ad');ctx.globalAlpha=1;ctx.fillStyle='#fff4b2';ctx.font='bold 15px monospace';ctx.fillText('-'+s.damage,enemyX-10,89)}
