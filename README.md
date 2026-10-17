@@ -1,5 +1,3 @@
-# Debt Quest — Night Hunter Combat Art Test
+Debt Quest v1.0 — articulated blade combat experiment
 
-Standalone visual prototype. Upload the four files to a *separate* GitHub Pages test repository, or open `index.html` on a computer. Do not overwrite the working Debt Quest financial game. This prototype has no financial storage or connections.
-
-The detailed characters are concept-art cutouts, animated with CSS movement and effects. They are not production-ready sprite-sheet animation frames. Some extracted edges are imperfect. The goal is to validate the art direction and scale on iPhone before producing real per-action sprites.
+Updates battle.js with animated wrist-attached swords, staged wind-up and swings, hit-timed sparks, and reduced tackle movement. Preserves the original detailed character images, game UI and local financial storage. This is a transitional hybrid: the static concept image still has painted swords, so visual overlap can occur. A fully authentic animation needs frame-by-frame character assets. Upload all files to your test repository root; back up game saves first.
