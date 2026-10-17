@@ -1,19 +1,21 @@
-# Debt Quest — Combat Loop Lab (audited revision)
+# Debt Quest Combat Rebuild v3 — Standalone Prototype
 
-Standalone prototype only. No financial data is read, written, or modified. Upload the CONTENTS of this folder to a separate GitHub Pages test repository, not the main Debt Quest app.
+Deploy `index.html`, `engine.js`, and `combat.js` together to a **separate** GitHub Pages test repository. Do not overwrite the main Debt Quest application. No localStorage, network requests, or real financial data are used.
 
-## Fixes in this revision
-- Attack contacts are recorded by the deterministic battle engine, once per intended hit (one for Attack, two for Twin-Blade Art).
-- Each hit decreases enemy HP and creates an event containing actual applied damage (capped by remaining HP).
-- Focus costs and gains, guard break, defended damage, victory, defeat, and turn transitions are validated in `test-engine.cjs`.
-- Input is locked outside the ready phase; reset invalidates all running asynchronous animations and delayed enemy-recoil callbacks.
-- Guard break skips one enemy retaliation; a win ends combat before the enemy acts.
-
-## Verification
-Run `node test-engine.cjs` to execute 10 passing deterministic rule tests. `node --check engine.js` and `node --check combat.js` pass. Browser automation was attempted but this environment blocked browser navigation, so real Safari/iPhone rendering and end-to-end interaction remain UNVERIFIED. Do not call this a flawless or production-ready combat loop yet.
+## Changes
+- Discontinued the defective 12-frame extracted concept atlas.
+- Built a resolution-independent SVG character rig with articulated shoulders and attached blades. This is clean vector placeholder art, **not** the final detailed pixel-art asset.
+- Attack uses eased approach, anticipation, swing, timed contact, recoil, recovery, and return.
+- Damage is triggered once at the defined swing contact threshold; the battle rules independently cap hit counts.
+- Twin Blade uses two separate hit events. Defend, guard break, victory, defeat, and reset supported.
+- Reset invalidates old animation frames and pending enemy turns via generation token.
+- Background is drawn without any text contamination.
 
 ## Known limitations
-- Contact is keyed to animation frame 6, not geometric blade collision.
-- Character art remains sourced from blurry, imperfect concept illustrations.
-- Enemy attack uses simple movement, not a frame-by-frame animation.
-- This is not integrated with the main Debt Quest battle engine.
+- Artwork is a simple vector rig rather than the requested premium cinematic pixel art.
+- Contact is authored to a choreography point, not true blade geometry collision.
+- Not verified in an interactive iPhone browser; requires hands-on test before production integration.
+- Enemy attack remains a simple lunge and needs its own art and animation polish.
+
+## Tests
+Run `node test-engine.cjs` and `node --check combat.js`.
