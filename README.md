@@ -1,3 +1,1 @@
-Debt Quest: Night Hunter Actual Sword Poses
-
-This is a STANDALONE art proof, not an update to the finance app. Upload the four files to a new GitHub Pages repository to test on iPhone. Twelve distinct poses are extracted from approved concept art. They are not professionally cleaned frame-by-frame sprites; extraction artifacts and imperfect continuity remain. Do not overwrite the existing Debt Quest repo.
+Animation Proof 02: both playback buttons now show all 12 atlas frames in order. Slow Motion also plays all 12. Pixelated rendering requested. Original artwork remains soft because it was extracted from a concept sheet. This is a diagnostic build, not finished sword animation. Upload to a separate test repo, not the main app.
