@@ -1,21 +1,19 @@
-# Debt Quest Combat Rebuild v3 — Standalone Prototype
+# Debt Quest Combat v4 — Art-first combat test
 
-Deploy `index.html`, `engine.js`, and `combat.js` together to a **separate** GitHub Pages test repository. Do not overwrite the main Debt Quest application. No localStorage, network requests, or real financial data are used.
+This is a standalone GitHub Pages experiment. Upload the *contents* of this folder to a separate test repository root. It does not access financial storage, service workers, or the main game.
 
-## Changes
-- Discontinued the defective 12-frame extracted concept atlas.
-- Built a resolution-independent SVG character rig with articulated shoulders and attached blades. This is clean vector placeholder art, **not** the final detailed pixel-art asset.
-- Attack uses eased approach, anticipation, swing, timed contact, recoil, recovery, and return.
-- Damage is triggered once at the defined swing contact threshold; the battle rules independently cap hit counts.
-- Twin Blade uses two separate hit events. Defend, guard break, victory, defeat, and reset supported.
-- Reset invalidates old animation frames and pending enemy turns via generation token.
-- Background is drawn without any text contamination.
+## What is real
+- Detailed original Night Hunter and Coin Wraith illustration assets, rather than the geometric v3 placeholders.
+- Animation-driven approach, contact-frame HP reduction, enemy recoil, return, retaliation, focus, guard, victory and defeat.
+- A guarded combat state machine, one-hit-per-token protection, and reset generation invalidation.
+- No canvas cropping: full transparent character images scale with `object-fit:contain`.
 
-## Known limitations
-- Artwork is a simple vector rig rather than the requested premium cinematic pixel art.
-- Contact is authored to a choreography point, not true blade geometry collision.
-- Not verified in an interactive iPhone browser; requires hands-on test before production integration.
-- Enemy attack remains a simple lunge and needs its own art and animation polish.
+## What is not yet real
+- The art is **single-pose**, not twelve clean, professionally illustrated body poses. A transform-based lunge is not frame-by-frame sword animation.
+- No real blade collision polygons; contact is choreographed to the animation timeline.
+- No live iPhone Safari visual verification was possible here.
 
-## Tests
-Run `node test-engine.cjs` and `node --check combat.js`.
+## Test
+Run `node test-engine.cjs` for the engine assertions. To run locally: `python -m http.server 8000`, then open http://localhost:8000.
+
+The visible header is `DEBT QUEST · COMBAT v4`. Deploy separately from your saved financial application.

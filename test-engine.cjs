@@ -1,12 +1,13 @@
-const assert=require('node:assert/strict');const B=require('./engine.js');let checks=0;function test(name,fn){fn();checks++;console.log('PASS',name)}
-test('start attack and block overlapping commands',()=>{let s=B.create();assert.equal(B.startAction(s,'attack'),true);assert.equal(B.startAction(s,'attack'),false);assert.equal(B.startAction(s,'special'),false)});
-test('one attack applies exactly one hit',()=>{let s=B.create();B.startAction(s,'attack');assert.equal(B.heroContact(s).damage,10);assert.equal(B.heroContact(s),null);assert.equal(s.enemyHP,58)});
-test('special requires 3 focus and hits exactly twice',()=>{let s=B.create();assert.equal(B.startAction(s,'special'),false);s.focus=3;assert.equal(B.startAction(s,'special'),true);assert.equal(s.focus,0);assert.equal(B.heroContact(s).damage,12);assert.equal(B.heroContact(s).damage,16);assert.equal(B.heroContact(s),null);assert.equal(s.enemyHP,40)});
-test('guard break cancels one retaliation and resets guard',()=>{let s=B.create();s.guard=1;B.startAction(s,'attack');assert.equal(B.heroContact(s).broken,true);B.finishHero(s);assert.equal(B.enemyContact(s),null);B.finishTurn(s);assert.equal(s.guard,3);assert.equal(s.phase,'ready')});
-test('defend reduces incoming damage and awards focus',()=>{let s=B.create();B.startAction(s,'defend');assert.equal(s.focus,1);B.finishHero(s);assert.equal(B.enemyContact(s).damage,3);assert.equal(s.heroHP,33);B.finishTurn(s);assert.equal(s.defending,false)});
-test('normal attack awards focus once after completion',()=>{let s=B.create();B.startAction(s,'attack');B.heroContact(s);B.finishHero(s);assert.equal(s.focus,1);assert.equal(B.finishHero(s),false);assert.equal(s.focus,1)});
-test('victory caps damage and prevents enemy retaliation',()=>{let s=B.create();s.enemyHP=4;B.startAction(s,'attack');assert.equal(B.heroContact(s).damage,4);assert.equal(s.won,true);assert.equal(s.phase,'finished');assert.equal(B.finishHero(s),false);assert.equal(B.enemyContact(s),null)});
-test('defeat stops turn progression',()=>{let s=B.create();s.heroHP=3;B.startAction(s,'attack');B.heroContact(s);B.finishHero(s);assert.equal(B.enemyContact(s).damage,3);assert.equal(s.lost,true);assert.equal(B.finishTurn(s),false)});
-test('illegal actions rejected',()=>{let s=B.create();assert.equal(B.startAction(s,'nonsense'),false);assert.equal(B.heroContact(s),null);assert.equal(B.enemyContact(s),null)});
-test('repeated turns preserve legal state and bounded resources',()=>{let s=B.create();for(let i=0;i<20&&!s.won&&!s.lost;i++){assert(B.startAction(s,'attack'));B.heroContact(s);if(s.won)break;B.finishHero(s);if(!s.staggered)B.enemyContact(s);if(s.lost)break;B.finishTurn(s);assert(s.heroHP>=0&&s.heroHP<=36);assert(s.enemyHP>=0&&s.enemyHP<=68);assert(s.focus>=0&&s.focus<=3)}assert(s.won||s.lost)});
-console.log(`${checks} engine tests passed`);
+const assert=require('node:assert/strict'), E=require('./engine.js').DQEngine;
+let count=0;function test(name,fn){fn();count++;console.log('PASS',name)}
+test('initial values',()=>{const s=E.create();assert.equal(s.enemyHP,68);assert.equal(s.phase,'ready')});
+test('cannot double start',()=>{const s=E.create();assert.equal(E.start(s,'attack'),true);assert.equal(E.start(s,'attack'),false)});
+test('one hit per token',()=>{const s=E.create(),seen=new Set();E.start(s,'attack');assert.equal(E.hit(s,10,'slash',seen),10);assert.equal(E.hit(s,10,'slash',seen),false);assert.equal(s.enemyHP,58)});
+test('guard break skips enemy',()=>{const s=E.create();s.guard=1;E.start(s,'attack');E.hit(s,10,'slash',new Set());assert.equal(E.finish(s,'attack'),'break');assert.equal(s.phase,'ready');assert.equal(s.heroHP,36)});
+test('defend mitigation',()=>{const s=E.create();E.start(s,'defend');E.finish(s,'defend');assert.equal(E.retaliate(s),3)});
+test('normal retaliation',()=>{const s=E.create();E.start(s,'attack');E.finish(s,'attack');assert.equal(E.retaliate(s),8)});
+test('focus special cost',()=>{const s=E.create();assert.equal(E.start(s,'special'),false);s.focus=3;assert.equal(E.start(s,'special'),true);assert.equal(s.focus,0)});
+test('victory stops enemy',()=>{const s=E.create();s.enemyHP=4;E.start(s,'attack');assert.equal(E.hit(s,10,'slash',new Set()),4);assert.equal(s.phase,'victory');assert.equal(E.retaliate(s),false)});
+test('defeat stops new commands',()=>{const s=E.create();s.heroHP=4;E.start(s,'attack');E.finish(s,'attack');E.retaliate(s);assert.equal(s.phase,'defeat');assert.equal(E.start(s,'attack'),false)});
+test('special two distinct hits',()=>{const s=E.create(),seen=new Set();s.focus=3;E.start(s,'special');E.hit(s,10,'blade-1',seen);E.hit(s,20,'blade-2',seen);assert.equal(s.enemyHP,38)});
+console.log(`${count} engine tests passed`);
